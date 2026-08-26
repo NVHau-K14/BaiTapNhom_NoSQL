@@ -1,0 +1,149 @@
+﻿<div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Edit">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold" id="editStudentModalLabel">Chỉnh Sửa Thông Tin Sinh Viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Thông tin cố định -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Mã SV</label>
+                            <input type="text" id="edit_masv" name="EditSinhVien.Masv" class="form-control bg-light" readonly />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Họ và Tên (*)</label>
+                            <input type="text" id="edit_hoten" name="EditSinhVien.Hoten" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Tuổi (*)</label>
+                            <input type="number" id="edit_tuoi" name="EditSinhVien.Tuoi" class="form-control" min="1" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Giới Tính</label>
+                            <select id="edit_phai" name="EditSinhVien.Phai" class="form-select">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Mã Lớp (*)</label>
+                            <input type="text" id="edit_malop" name="EditSinhVien.Malop" class="form-control" required />
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Quản lý Ngoại Ngữ Động -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-primary mb-0">Danh Sách Ngoại Ngữ</label>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="addEditLanguageRow()">+ Thêm ngoại ngữ</button>
+                        </div>
+                        <div id="editLanguageContainer"></div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Quản lý Môn Học Động -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-primary mb-0">Danh Sách Môn Học & Điểm</label>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="addEditSubjectRow()">+ Thêm môn học</button>
+                        </div>
+                        <div id="editSubjectContainer"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-warning fw-bold">Lưu Thay Đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let editLangIdx = 0;
+    let editSubIdx = 0;
+
+    function openEditModal(sv) {
+        // Hỗ trợ đọc cả viết hoa và viết thường
+        const masv = sv.masv || sv.Masv || '';
+        const hoten = sv.hoten || sv.Hoten || '';
+        const tuoi = sv.tuoi || sv.Tuoi || '';
+        const phai = sv.phai || sv.Phai || 'Nam';
+        const malop = sv.malop || sv.Malop || '';
+        const ngoaingu = sv.ngoaingu || sv.Ngoaingu || [];
+        const monhoc = sv.monhoc || sv.Monhoc || [];
+
+        // Gán dữ liệu cơ bản
+        document.getElementById('edit_masv').value = masv;
+        document.getElementById('edit_hoten').value = hoten;
+        document.getElementById('edit_tuoi').value = tuoi;
+        document.getElementById('edit_phai').value = phai;
+        document.getElementById('edit_malop').value = malop;
+
+        // Đổ danh sách Ngoại ngữ
+        const langContainer = document.getElementById('editLanguageContainer');
+        langContainer.innerHTML = '';
+        editLangIdx = 0;
+        if (ngoaingu.length > 0) {
+            ngoaingu.forEach(nn => {
+                addEditLanguageRow(nn);
+            });
+        }
+
+        // Đổ danh sách Môn học
+        const subContainer = document.getElementById('editSubjectContainer');
+        subContainer.innerHTML = '';
+        editSubIdx = 0;
+        if (monhoc.length > 0) {
+            monhoc.forEach(mh => {
+                const mamon = mh.mamon || mh.Mamon || '';
+                const tenmon = mh.tenmon || mh.Tenmon || '';
+                const diem = mh.diem !== undefined ? mh.diem : (mh.Diem !== undefined ? mh.Diem : '');
+                addEditSubjectRow(mamon, tenmon, diem);
+            });
+        }
+
+        // Mở popup modal
+        new bootstrap.Modal(document.getElementById('editStudentModal')).show();
+    }
+
+    function addEditLanguageRow(value = '') {
+        const container = document.getElementById('editLanguageContainer');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2 edit-lang-item';
+        div.innerHTML = `
+            <input type="text" name="EditSinhVien.Ngoaingu[${editLangIdx}]" value="${value}" class="form-control" placeholder="Nhập tên ngoại ngữ..." />
+            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.edit-lang-item').remove()">Xóa</button>
+        `;
+        container.appendChild(div);
+        editLangIdx++;
+    }
+
+    function addEditSubjectRow(mamon = '', tenmon = '', diem = '') {
+        const container = document.getElementById('editSubjectContainer');
+        const div = document.createElement('div');
+        div.className = 'row g-2 mb-2 edit-subject-item';
+        div.innerHTML = `
+            <div class="col-md-3">
+                <input type="text" name="EditSinhVien.Monhoc[${editSubIdx}].Mamon" value="${mamon}" class="form-control" placeholder="Mã môn" required />
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="EditSinhVien.Monhoc[${editSubIdx}].Tenmon" value="${tenmon}" class="form-control" placeholder="Tên môn học" required />
+            </div>
+            <div class="col-md-3">
+                <input type="number" step="0.1" min="0" max="10" name="EditSinhVien.Monhoc[${editSubIdx}].Diem" value="${diem}" class="form-control" placeholder="Điểm (0-10)" required />
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.edit-subject-item').remove()">X</button>
+            </div>
+        `;
+        container.appendChild(div);
+        editSubIdx++;
+    }
+</script>

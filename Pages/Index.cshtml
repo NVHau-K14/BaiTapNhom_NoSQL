@@ -1,0 +1,130 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Quản lý Sinh viên";
+}
+
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-primary fw-bold mb-0">Danh Sách Sinh Viên</h2>
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+            + Thêm Sinh Viên
+        </button>
+    </div>
+
+    <!-- Thông báo lỗi -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @foreach (var modelState in ViewData.ModelState.Values)
+            {
+                @foreach (var error in modelState.Errors)
+                {
+                    <span>@error.ErrorMessage</span>
+                }
+            }
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thanh tìm kiếm, lọc & XÓA THEO LỚP -->
+    <form method="get" class="row g-2 mb-3 bg-light p-3 rounded border align-items-center">
+        <div class="col-md-4">
+            <input type="text" name="SearchMasv" value="@Model.SearchMasv" class="form-control" placeholder="Tìm theo Mã SV (SV001)..." />
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="FilterLop" value="@Model.FilterLop" class="form-control" placeholder="Lọc theo Lớp (L01)..." />
+        </div>
+        <div class="col-md-5 d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Tìm kiếm / Lọc</button>
+            <a href="/" class="btn btn-secondary">Đặt lại</a>
+
+            <!-- Nút Xóa Theo Lớp chỉ kích hoạt khi đang lọc theo 1 lớp cụ thể -->
+            @if (!string.IsNullOrEmpty(Model.FilterLop))
+            {
+                <button type="submit"
+                        asp-page-handler="DeleteClass"
+                        formmethod="post"
+                        name="malop"
+                        value="@Model.FilterLop"
+                        class="btn btn-outline-danger"
+                        onclick="return confirm('CẢNH BÁO: Bạn có chắc muốn xóa TẤT CẢ sinh viên thuộc lớp @Model.FilterLop?');">
+                    Xóa cả lớp @Model.FilterLop
+                </button>
+            }
+        </div>
+    </form>
+
+    <!-- Bảng danh sách sinh viên -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã SV</th>
+                    <th>Họ Tên</th>
+                    <th>Tuổi</th>
+                    <th>Phái</th>
+                    <th>Mã Lớp</th>
+                    <th>Ngoại Ngữ</th>
+                    <th>Môn Học & Điểm</th>
+                    <th style="width: 160px;">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.DanhSachSinhVien != null && Model.DanhSachSinhVien.Any())
+                {
+                    @foreach (var sv in Model.DanhSachSinhVien)
+                    {
+                        <tr>
+                            <td class="fw-bold">@sv.Masv</td>
+                            <td>@sv.Hoten</td>
+                            <td>@sv.Tuoi</td>
+                            <td>@sv.Phai</td>
+                            <td><span class="badge bg-info text-dark">@sv.Malop</span></td>
+                            <td>
+                                @foreach (var nn in sv.Ngoaingu)
+                                {
+                                    <span class="badge bg-secondary me-1">@nn</span>
+                                }
+                            </td>
+                            <td>
+                                <ul class="list-unstyled mb-0">
+                                    @foreach (var mh in sv.Monhoc)
+                                    {
+                                        <li><small>• <strong>@mh.Tenmon:</strong> @mh.Diem</small></li>
+                                    }
+                                </ul>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <!-- Nút SỬA: Chuyển sang trang Edit.cshtml -->
+                                    <button type="button"
+                                            class="btn btn-warning btn-sm"
+                                            onclick='openEditModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(sv, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase })))'>
+                                        Sửa
+                                    </button>
+
+                                    <!-- Nút XÓA cá nhân -->
+                                    <form method="post" asp-page-handler="Delete" onsubmit="return confirm('Bạn có chắc muốn xóa sinh viên @sv.Hoten (@sv.Masv)?');">
+                                        <input type="hidden" name="masv" value="@sv.Masv" />
+                                        <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">Không tìm thấy sinh viên nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<partial name="_StudentModal" />
+<partial name="_EditStudentModal" />

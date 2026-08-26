@@ -1,0 +1,127 @@
+﻿@model web_qlsinhvien.Pages.IndexModel
+
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Add">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="addStudentModalLabel">Thêm Mới Sinh Viên</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Thông tin cố định -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Mã SV (*)</label>
+                            <input type="text" asp-for="NewSinhVien.Masv" class="form-control" placeholder="SV031..." required />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-bold">Họ và Tên (*)</label>
+                            <input type="text" asp-for="NewSinhVien.Hoten" class="form-control" placeholder="Nguyễn Văn A..." required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Tuổi (*)</label>
+                            <input type="number" asp-for="NewSinhVien.Tuoi" class="form-control" min="1" value="20" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Phái</label>
+                            <select asp-for="NewSinhVien.Phai" class="form-select">
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Mã Lớp (*)</label>
+                            <input type="text" asp-for="NewSinhVien.Malop" class="form-control" placeholder="L01..." required />
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Mảng Ngoại Ngữ Động -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-secondary mb-0">Danh sách Ngoại Ngữ</label>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="addLanguageRow()">+ Thêm ngoại ngữ</button>
+                        </div>
+                        <div id="languageContainer">
+                            <div class="input-group mb-2 lang-item">
+                                <input type="text" name="NewSinhVien.Ngoaingu[0]" class="form-control" value="Tiếng Anh" placeholder="Nhập tên ngoại ngữ..." />
+                                <button type="button" class="btn btn-outline-danger" onclick="this.closest('.lang-item').remove()">Xóa</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Mảng Môn Học Động (Bộ 3: Mã, Tên, Điểm) -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label fw-bold text-secondary mb-0">Danh sách Môn Học</label>
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="addSubjectRow()">+ Thêm môn học</button>
+                        </div>
+                        <div id="subjectContainer">
+                            <!-- Hàng nhập môn học mẫu -->
+                            <div class="row g-2 mb-2 subject-item">
+                                <div class="col-md-3">
+                                    <input type="text" name="NewSinhVien.Monhoc[0].Mamon" class="form-control" placeholder="Mã môn (MH001)" />
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="text" name="NewSinhVien.Monhoc[0].Tenmon" class="form-control" placeholder="Tên môn học" />
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="number" step="0.1" min="0" max="10" name="NewSinhVien.Monhoc[0].Diem" class="form-control" placeholder="Điểm (0-10)" />
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.subject-item').remove()">X</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu Sinh Viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let langIndex = 1;
+    function addLanguageRow() {
+        const container = document.getElementById('languageContainer');
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2 lang-item';
+        div.innerHTML = `
+            <input type="text" name="NewSinhVien.Ngoaingu[${langIndex}]" class="form-control" placeholder="Nhập tên ngoại ngữ..." />
+            <button type="button" class="btn btn-outline-danger" onclick="this.closest('.lang-item').remove()">Xóa</button>
+        `;
+        container.appendChild(div);
+        langIndex++;
+    }
+
+    let subIndex = 1;
+    function addSubjectRow() {
+        const container = document.getElementById('subjectContainer');
+        const div = document.createElement('div');
+        div.className = 'row g-2 mb-2 subject-item';
+        div.innerHTML = `
+            <div class="col-md-3">
+                <input type="text" name="NewSinhVien.Monhoc[${subIndex}].Mamon" class="form-control" placeholder="Mã môn" />
+            </div>
+            <div class="col-md-5">
+                <input type="text" name="NewSinhVien.Monhoc[${subIndex}].Tenmon" class="form-control" placeholder="Tên môn học" />
+            </div>
+            <div class="col-md-3">
+                <input type="number" step="0.1" min="0" max="10" name="NewSinhVien.Monhoc[${subIndex}].Diem" class="form-control" placeholder="Điểm" />
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.subject-item').remove()">X</button>
+            </div>
+        `;
+        container.appendChild(div);
+        subIndex++;
+    }
+</script>
