@@ -2,7 +2,7 @@
 db = db.getSiblingDB('qlsinhvien_db');
 
 // Xóa dữ liệu cũ trong collection sinhvien để tránh trùng lặp khi chạy lại nhiều lần
-db.sinhvien.drop();
+db.sv.drop();
 
 // 2. Định nghĩa các tập dữ liệu
 const ho = ["Nguyễn", "Trần", "Lê", "Phạm", "Vũ", "Võ", "Đặng", "Bùi", "Đỗ", "Hồ", "Ngô", "Dương", "Lý"];
@@ -91,7 +91,7 @@ for (let i = 1; i <= 30; i++) {
 db.sinhvien.insertMany(dsSinhVien);
 
 // 5. Khởi tạo Index theo như yêu cầu của đề tài
-db.sinhvien.createIndex({ masv: 1 }, { unique: true });
-db.sinhvien.createIndex({ malop: 1, hoten: 1 });
+db.sv.createIndex({ masv: 1 }, { unique: true });
+db.sv.createIndex({ malop: 1, hoten: 1 });
 
 print("Đã tạo thành công 30 sinh viên và đánh Index cho collection!");
