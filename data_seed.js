@@ -88,7 +88,7 @@ for (let i = 1; i <= 30; i++) {
 }
 
 // 4. Insert toàn bộ vào Collection
-db.sinhvien.insertMany(dsSinhVien);
+db.sv.insertMany(dsSinhVien);
 
 // 5. Khởi tạo Index theo như yêu cầu của đề tài
 db.sv.createIndex({ masv: 1 }, { unique: true });
